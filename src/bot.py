@@ -8,15 +8,14 @@ from src.config import BOT_TOKEN
 from src.database import Database
 from src.weather_api import WeatherAPI
 
-# Настройка логирования
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Инициализация бота и диспетчера
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
-# Инициализация базы данных
+
 db = Database()
 
 
@@ -28,7 +27,6 @@ async def cmd_start(message: Message):
         "Отправь мне название города, и я покажу текущую погоду.\n"
         "Используй /help для получения списка команд."
     )
-    # Команды не сохраняем в базу данных
 
 
 @dp.message(Command("help"))
@@ -42,7 +40,7 @@ async def cmd_help(message: Message):
         "Чтобы узнать погоду, просто отправьте название города."
     )
     await message.answer(help_text)
-    # Команды не сохраняем в базу данных
+
 
 
 @dp.message(Command("history"))
@@ -61,7 +59,6 @@ async def cmd_history(message: Message):
                 response_text += f"{i}. {timestamp}: {request}\n"
 
         await message.answer(response_text)
-        # Команды не сохраняем в базу данных
     except Exception as e:
         logger.error(f"Ошибка при работе с историей: {e}")
         await message.answer("Произошла ошибка при получении истории. Пожалуйста, попробуйте позже.")
@@ -72,15 +69,11 @@ async def handle_message(message: Message):
     """Обработчик текстовых сообщений"""
     city = message.text.strip()
 
-    # Получаем данные о погоде
     try:
         weather_response = await WeatherAPI.get_weather(city)
 
-        # Отправляем ответ пользователю
         await message.answer(weather_response)
 
-        # Сохраняем взаимодействие в базу данных
-        # Только текстовые запросы (города) сохраняем в базу данных
         try:
             await db.save_interaction(
                 message.from_user.id,
@@ -100,7 +93,7 @@ async def handle_message(message: Message):
 
 async def main():
     """Основная функция запуска бота"""
-    # Подключаемся к базе данных
+
     try:
         await db.connect()
         logger.info("Успешное подключение к базе данных")
@@ -108,7 +101,7 @@ async def main():
         logger.error(f"Ошибка подключения к базе данных: {e}")
         logger.warning("Бот будет работать без сохранения в базу данных")
 
-    # Запускаем бота
+
     try:
         logger.info("Запуск бота...")
         await dp.start_polling(bot)

@@ -15,7 +15,6 @@ class Database:
         try:
             self.pool = await asyncpg.create_pool(DATABASE_URL)
 
-            # Создание таблицы, если она не существует
             async with self.pool.acquire() as conn:
                 await conn.execute('''
                     CREATE TABLE IF NOT EXISTS user_interactions (
